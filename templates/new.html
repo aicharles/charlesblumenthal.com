@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <canvas id="myCanvas" width="300" height="300" style="border: solid #000"></canvas>
+    <script>
+      const canvas = document.getElementById('myCanvas')
+      canvas.width =  1000
+      const context = canvas.getContext("2d")
+      context.beginPath()
+      context.moveTo(10,10)
+      context.lineTo(10,50)
+      context.stroke()
+
+      function getRandomInt(max) {
+        return Math.floor(Math.random() * Math.floor(max));
+      }
+      let i = 0;
+      for (i = 0; i < 100; i++) {
+        if (i % 5 == 0) {
+          context.lineWidth = getRandomInt(5);
+          context.arc(getRandomInt(300), getRandomInt(1000), getRandomInt(300), getRandomInt(300), getRandomInt(300)*Math.PI)
+          context.stroke();
+          console.log('this is loop '+ (i));
+        }
+
+
+
+}
+
+
+
+
+
+    </script>
+  </body>
+</html>
