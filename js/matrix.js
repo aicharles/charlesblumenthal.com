@@ -5,13 +5,14 @@ var curr_page = window.location.href
 //making the canvas full screen
 
 if (curr_page.endsWith("cv")) {
-  c.width = 550;
+  c.width = document.getElementById("matrix").offsetWidth;
+  // c.height = document.getElementById('matrix').clientHeight;
 
 } else {
   c.width = window.innerWidth;
+  c.height = window.innerHeight;
 
 }
-c.height = window.innerHeight;
 
 
 //chinese characters - taken from the unicode charset
