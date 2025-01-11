@@ -94,7 +94,7 @@ resource "aws_iam_role" "terraform_role" {
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringLike = {
-            "token.actions.githubusercontent.com:sub" : "repo:${var.github_repo}:ref:refs/heads/main"
+            "token.actions.githubusercontent.com:sub" : "repo:${var.github_repo}:ref:refs/heads/*"
             "token.actions.githubusercontent.com:aud" : "sts.amazonaws.com"
           }
         }
@@ -118,7 +118,7 @@ resource "aws_iam_role" "deployer_role" {
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringLike = {
-            "token.actions.githubusercontent.com:sub" : "repo:${var.github_repo}:ref:refs/heads/main"
+            "token.actions.githubusercontent.com:sub" : "repo:${var.github_repo}:ref:refs/heads/*"
             "token.actions.githubusercontent.com:aud" : "sts.amazonaws.com"
           }
         }
