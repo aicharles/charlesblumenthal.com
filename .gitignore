@@ -4,10 +4,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Next.js
-.next/
-out/
-build/
+# Next.js (in website directory)
+website/.next/
+website/out/
+website/build/
 
 # Logs
 logs/
@@ -40,6 +40,8 @@ override.tf.json
 *_override.tf.json
 .terraformrc
 .terraformrc.json
+terraform.tfvars
+*.tfvars
 
 # IDEs and editors
 .vscode/
