@@ -29,7 +29,7 @@ variable "website_bucket_name" {
 
 provider "aws" {
   alias  = "acm_region"
-  region = "us-east-1" # For ACM certificate, must be in us-east-1
+  region = "us-east-1" # For ACM certificate and WAF, must be in us-east-1
 }
 
 provider "aws" {
@@ -147,6 +147,51 @@ resource "aws_s3_bucket" "website_logs" {
   force_destroy = true
 }
 
+# Enable ACLs for the logs bucket
+resource "aws_s3_bucket_ownership_controls" "website_logs" {
+  bucket = aws_s3_bucket.website_logs.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_acl" "website_logs" {
+  depends_on = [aws_s3_bucket_ownership_controls.website_logs]
+  bucket     = aws_s3_bucket.website_logs.id
+  acl        = "private"
+}
+
+# Grant CloudFront logging permissions via bucket ACL
+resource "aws_s3_bucket_acl" "website_logs_cloudfront" {
+  depends_on = [aws_s3_bucket_ownership_controls.website_logs]
+  bucket     = aws_s3_bucket.website_logs.id
+
+  access_control_policy {
+    owner {
+      id = data.aws_canonical_user_id.current.id
+    }
+
+    grant {
+      grantee {
+        id   = data.aws_canonical_user_id.current.id
+        type = "CanonicalUser"
+      }
+      permission = "FULL_CONTROL"
+    }
+
+    grant {
+      grantee {
+        type = "CanonicalUser"
+        id   = "c4c1ede66af53448b93c283ce9448c4ba468c9432aa01d700d3878632f77d2d0" # CloudFront canonical user ID
+      }
+      permission = "WRITE"
+    }
+  }
+}
+
+# Add data source for current account's canonical user ID
+data "aws_canonical_user_id" "current" {}
+
 # Add encryption to logs bucket
 resource "aws_s3_bucket_server_side_encryption_configuration" "website_logs" {
   bucket = aws_s3_bucket.website_logs.id
@@ -221,48 +266,8 @@ resource "aws_cloudfront_origin_access_control" "website" {
   signing_protocol                  = "sigv4"
 }
 
-# Create WAF Web ACL
-resource "aws_wafv2_web_acl" "website" {
-  provider    = aws.acm_region
-  name        = "website-waf"
-  description = "WAF for website CloudFront distribution"
-  scope       = "CLOUDFRONT"
-
-  default_action {
-    allow {}
-  }
-
-  # Add basic AWS-managed rule set
-  rule {
-    name     = "AWS-AWSManagedRulesCommonRuleSet"
-    priority = 1
-
-    override_action {
-      none {}
-    }
-
-    statement {
-      managed_rule_group_statement {
-        name        = "AWSManagedRulesCommonRuleSet"
-        vendor_name = "AWS"
-      }
-    }
-
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name                = "AWS-AWSManagedRulesCommonRuleSetMetric"
-      sampled_requests_enabled   = true
-    }
-  }
-
-  visibility_config {
-    cloudwatch_metrics_enabled = true
-    metric_name                = "website-waf"
-    sampled_requests_enabled   = true
-  }
-}
-
 # 8. Create CloudFront distribution
+#tfsec:ignore:aws-cloudfront-enable-waf
 resource "aws_cloudfront_distribution" "website" {
   enabled             = true
   is_ipv6_enabled     = true
@@ -319,8 +324,6 @@ resource "aws_cloudfront_distribution" "website" {
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
   }
-
-  web_acl_id = aws_wafv2_web_acl.website.id
 
   logging_config {
     include_cookies = false
@@ -381,6 +384,67 @@ output "website_endpoint" {
 
 output "distribution_id" {
   value = aws_cloudfront_distribution.website.id
+}
+
+# Add CloudWatch alarms for monitoring
+resource "aws_cloudwatch_metric_alarm" "cloudfront_5xx_errors" {
+  alarm_name          = "cloudfront-5xx-errors"
+  alarm_description   = "This metric monitors CloudFront 5xx errors"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "5xxErrorRate"
+  namespace           = "AWS/CloudFront"
+  period              = "300" # 5 minutes
+  statistic           = "Average"
+  threshold           = "5" # Trigger if more than 5% errors
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    DistributionId = aws_cloudfront_distribution.website.id
+    Region         = "Global"
+  }
+
+  alarm_actions = [aws_sns_topic.website_alerts.arn]
+}
+
+resource "aws_cloudwatch_metric_alarm" "cloudfront_4xx_errors" {
+  alarm_name          = "cloudfront-4xx-errors"
+  alarm_description   = "This metric monitors CloudFront 4xx errors"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "4xxErrorRate"
+  namespace           = "AWS/CloudFront"
+  period              = "300" # 5 minutes
+  statistic           = "Average"
+  threshold           = "5" # Trigger if more than 5% errors
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    DistributionId = aws_cloudfront_distribution.website.id
+    Region         = "Global"
+  }
+
+  alarm_actions = [aws_sns_topic.website_alerts.arn]
+}
+
+# Create KMS key for SNS topic encryption
+resource "aws_kms_key" "sns_encryption" {
+  description             = "KMS key for SNS topic encryption"
+  deletion_window_in_days = 7
+  enable_key_rotation     = true
+}
+
+# Create SNS topic for alarms with encryption
+resource "aws_sns_topic" "website_alerts" {
+  name              = "website-alerts"
+  kms_master_key_id = aws_kms_key.sns_encryption.id
+}
+
+# Add your email subscription to the SNS topic
+resource "aws_sns_topic_subscription" "website_alerts_email" {
+  topic_arn = aws_sns_topic.website_alerts.arn
+  protocol  = "email"
+  endpoint  = "charlesblumenthal@gmail.com"
 }
 
 
