@@ -386,4 +386,65 @@ output "distribution_id" {
   value = aws_cloudfront_distribution.website.id
 }
 
+# Add CloudWatch alarms for monitoring
+resource "aws_cloudwatch_metric_alarm" "cloudfront_5xx_errors" {
+  alarm_name          = "cloudfront-5xx-errors"
+  alarm_description   = "This metric monitors CloudFront 5xx errors"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "5xxErrorRate"
+  namespace           = "AWS/CloudFront"
+  period              = "300" # 5 minutes
+  statistic           = "Average"
+  threshold           = "5" # Trigger if more than 5% errors
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    DistributionId = aws_cloudfront_distribution.website.id
+    Region         = "Global"
+  }
+
+  alarm_actions = [aws_sns_topic.website_alerts.arn]
+}
+
+resource "aws_cloudwatch_metric_alarm" "cloudfront_4xx_errors" {
+  alarm_name          = "cloudfront-4xx-errors"
+  alarm_description   = "This metric monitors CloudFront 4xx errors"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "4xxErrorRate"
+  namespace           = "AWS/CloudFront"
+  period              = "300" # 5 minutes
+  statistic           = "Average"
+  threshold           = "5" # Trigger if more than 5% errors
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    DistributionId = aws_cloudfront_distribution.website.id
+    Region         = "Global"
+  }
+
+  alarm_actions = [aws_sns_topic.website_alerts.arn]
+}
+
+# Create KMS key for SNS topic encryption
+resource "aws_kms_key" "sns_encryption" {
+  description             = "KMS key for SNS topic encryption"
+  deletion_window_in_days = 7
+  enable_key_rotation     = true
+}
+
+# Create SNS topic for alarms with encryption
+resource "aws_sns_topic" "website_alerts" {
+  name              = "website-alerts"
+  kms_master_key_id = aws_kms_key.sns_encryption.id
+}
+
+# Add your email subscription to the SNS topic
+resource "aws_sns_topic_subscription" "website_alerts_email" {
+  topic_arn = aws_sns_topic.website_alerts.arn
+  protocol  = "email"
+  endpoint  = "charlesblumenthal@gmail.com"
+}
+
 
