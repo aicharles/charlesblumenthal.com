@@ -6,9 +6,9 @@ export default function About() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-3xl font-bold text-slate-900">About Me</h2>
         <p className="mt-6 text-lg text-slate-600 max-w-3xl">
-          I'm a passionate software engineer with extensive experience in cloud architecture 
+          I&apos;m a passionate software engineer with extensive experience in cloud architecture 
           and full-stack development. My journey in tech has led me through various roles 
-          where I've developed scalable solutions for enterprise clients.
+          where I&apos;ve developed scalable solutions for enterprise clients.
         </p>
         
         <div className="mt-12 grid grid-cols-2 gap-6 md:grid-cols-4">

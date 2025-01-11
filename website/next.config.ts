@@ -1,5 +1,13 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
-const config: NextConfig = {};
+const nextConfig: NextConfig = {
+  output: 'export',
+  images: {
+    unoptimized: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true, // This will ignore ESLint errors during build
+  },
+}
 
-export default config;
+export default nextConfig

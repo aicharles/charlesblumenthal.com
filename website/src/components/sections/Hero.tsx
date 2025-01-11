@@ -22,7 +22,7 @@ export default function Hero() {
       <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-600 opacity-10 animate-gradient"></div>
       <div className="relative z-10 text-center px-8">
         <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
-          <span className="text-slate-900">Hi, I'm </span>
+          <span className="text-slate-900">Hi, I&apos;m </span>
           <span className="bg-gradient-to-r from-blue-600 to-cyan-600 text-transparent bg-clip-text">
             Charles
           </span>

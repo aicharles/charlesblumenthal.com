@@ -13,7 +13,7 @@ export default function Contact() {
         <div className="mt-12 max-w-3xl">
           <p className="text-lg text-slate-600">
             As a Principal Data Engineer specializing in AI/ML infrastructure and cloud architecture, 
-            I'm always interested in discussing innovative technical solutions and opportunities. 
+            I&apos;m always interested in discussing innovative technical solutions and opportunities. 
             Whether you have a project in mind or want to connect about data engineering, AI, or cloud architecture, 
             feel free to reach out!
           </p>
@@ -58,7 +58,7 @@ export default function Contact() {
               </div>
               <div>
                 <p className="font-medium text-slate-900">LinkedIn</p>
-                <p className="text-slate-600">Let's connect professionally</p>
+                <p className="text-slate-600">Let&apos;s connect professionally</p>
               </div>
             </a>
           </div>
