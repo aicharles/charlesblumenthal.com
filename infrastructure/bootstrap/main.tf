@@ -204,7 +204,7 @@ resource "aws_iam_role_policy" "deployer_policy" {
 variable "github_repo" {
   type        = string
   description = "GitHub repository (format: owner/repo)"
-  default     = "aicharles/charlesblumenthal-com"
+  default     = "aicharles/charlesblumenthal.com"
 }
 
 variable "website_bucket_name" {
