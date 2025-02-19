@@ -1,3 +1,12 @@
+variable "environment" {
+  type        = string
+  description = "The environment (dev or prod)"
+  validation {
+    condition     = contains(["dev", "prod"], var.environment)
+    error_message = "Environment must be either 'dev' or 'prod'"
+  }
+}
+
 terraform {
   required_providers {
     aws = {
@@ -8,7 +17,7 @@ terraform {
 
   backend "s3" {
     bucket         = "aicharles-personal-site-terraform-state"
-    key            = "website/terraform.tfstate"
+    key            = "website/${terraform.workspace}/terraform.tfstate"
     region         = "us-east-2"
     encrypt        = true
     dynamodb_table = "personal-site-terraform-state-lock"
@@ -17,14 +26,23 @@ terraform {
 
 variable "domain_name" {
   type        = string
-  default     = "charlesblumenthal.com"
   description = "The domain name for the website"
 }
 
 variable "website_bucket_name" {
   type        = string
-  default     = "charlesblumenthal-com-website"
   description = "The name of the S3 bucket for the website"
+}
+
+locals {
+  domain_name = var.environment == "prod" ? var.domain_name : "dev.${var.domain_name}"
+  bucket_name = var.environment == "prod" ? var.website_bucket_name : "${var.website_bucket_name}-dev"
+
+  common_tags = {
+    Environment = var.environment
+    ManagedBy   = "terraform"
+    Project     = "personal-website"
+  }
 }
 
 provider "aws" {
@@ -36,14 +54,17 @@ provider "aws" {
   region = "us-east-2" # Main region for all other resources
 }
 
+# Get current AWS account ID
+data "aws_caller_identity" "current" {}
+
 # 1. First create the Route53 zone
 resource "aws_route53_zone" "main" {
-  name = var.domain_name
+  name = local.domain_name
 }
 
 # 2. Reference the zone
 data "aws_route53_zone" "selected" {
-  name         = var.domain_name
+  name         = local.domain_name
   private_zone = false
 
   depends_on = [aws_route53_zone.main]
@@ -52,7 +73,7 @@ data "aws_route53_zone" "selected" {
 # 3. Create the certificate
 resource "aws_acm_certificate" "website" {
   provider          = aws.acm_region
-  domain_name       = var.domain_name
+  domain_name       = local.domain_name
   validation_method = "DNS"
 
   lifecycle {
@@ -89,8 +110,10 @@ resource "aws_acm_certificate_validation" "website" {
 
 # 6. Create S3 bucket and its configuration
 resource "aws_s3_bucket" "website" {
-  bucket        = var.website_bucket_name
+  bucket        = local.bucket_name
   force_destroy = true
+
+  tags = local.common_tags
 }
 
 resource "aws_s3_bucket_website_configuration" "website" {
@@ -130,6 +153,33 @@ resource "aws_kms_key" "website_bucket" {
   description             = "KMS key for website bucket encryption"
   deletion_window_in_days = 7
   enable_key_rotation     = true
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "Enable IAM User Permissions"
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        }
+        Action   = "kms:*"
+        Resource = "*"
+      },
+      {
+        Sid    = "AllowGitHubActionsKMS"
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/github-deployer-role"
+        }
+        Action = [
+          "kms:GenerateDataKey",
+          "kms:Decrypt"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
 }
 
 # Add bucket versioning
@@ -143,7 +193,7 @@ resource "aws_s3_bucket_versioning" "website" {
 # Add bucket logging
 #tfsec:ignore:aws-s3-enable-bucket-logging:This is a logs bucket - no need to log access to logs
 resource "aws_s3_bucket" "website_logs" {
-  bucket        = "${var.website_bucket_name}-logs"
+  bucket        = "${local.bucket_name}-logs"
   force_destroy = true
 }
 
@@ -272,7 +322,7 @@ resource "aws_cloudfront_distribution" "website" {
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = "index.html"
-  aliases             = [var.domain_name]
+  aliases             = [local.domain_name]
 
   depends_on = [aws_acm_certificate_validation.website]
 
@@ -330,6 +380,8 @@ resource "aws_cloudfront_distribution" "website" {
     bucket          = aws_s3_bucket.website_logs.bucket_regional_domain_name
     prefix          = "cloudfront-logs/"
   }
+
+  web_acl_id = var.environment == "dev" ? aws_wafv2_web_acl.dev_environment[0].id : null
 }
 
 # 9. Create S3 bucket policy after CloudFront is created
@@ -362,7 +414,7 @@ resource "aws_s3_bucket_policy" "website" {
 # 10. Create the website A record
 resource "aws_route53_record" "website" {
   zone_id = data.aws_route53_zone.selected.zone_id
-  name    = var.domain_name
+  name    = local.domain_name
   type    = "A"
 
   alias {
@@ -432,6 +484,33 @@ resource "aws_kms_key" "sns_encryption" {
   description             = "KMS key for SNS topic encryption"
   deletion_window_in_days = 7
   enable_key_rotation     = true
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "Enable IAM User Permissions"
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        }
+        Action   = "kms:*"
+        Resource = "*"
+      },
+      {
+        Sid    = "AllowGitHubActionsKMS"
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/github-deployer-role"
+        }
+        Action = [
+          "kms:GenerateDataKey",
+          "kms:Decrypt"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
 }
 
 # Create SNS topic for alarms with encryption
@@ -445,6 +524,65 @@ resource "aws_sns_topic_subscription" "website_alerts_email" {
   topic_arn = aws_sns_topic.website_alerts.arn
   protocol  = "email"
   endpoint  = "charlesblumenthal@gmail.com"
+}
+
+# Add WAF IPSet for dev environment
+resource "aws_wafv2_ip_set" "dev_allowed_ips" {
+  provider           = aws.acm_region # WAF needs to be in us-east-1
+  count              = var.environment == "dev" ? 1 : 0
+  name               = "allowed-ips"
+  description        = "IP addresses allowed to access dev environment"
+  ip_address_version = "IPV4"
+  scope              = "CLOUDFRONT"
+
+  addresses = var.allowed_ips # You'll define this in your tfvars files
+}
+
+# Create WAF WebACL for dev environment
+resource "aws_wafv2_web_acl" "dev_environment" {
+  provider    = aws.acm_region
+  count       = var.environment == "dev" ? 1 : 0
+  name        = "dev-environment-restrictions"
+  description = "ACL for dev environment access control"
+  scope       = "CLOUDFRONT"
+
+  default_action {
+    block {}
+  }
+
+  rule {
+    name     = "AllowListedIPs"
+    priority = 1
+
+    override_action {
+      none {}
+    }
+
+    statement {
+      ip_set_reference_statement {
+        arn = aws_wafv2_ip_set.dev_allowed_ips[0].arn
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "AllowListedIPsMetric"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  visibility_config {
+    cloudwatch_metrics_enabled = true
+    metric_name                = "DevEnvironmentACLMetric"
+    sampled_requests_enabled   = true
+  }
+}
+
+# Add variable for allowed IPs
+variable "allowed_ips" {
+  type        = list(string)
+  description = "List of IP addresses allowed to access dev environment"
+  default     = [] # Empty default for prod
 }
 
 
