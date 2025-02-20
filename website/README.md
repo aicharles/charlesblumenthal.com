@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Charles Blumenthal Website
 
-## Getting Started
+This is my personal website built with Next.js and deployed to AWS using CloudFront and S3.
 
-First, run the development server:
+## Development
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The website is automatically deployed to [charlesblumenthal.com](https://charlesblumenthal.com) when changes are pushed to the main branch.
 
-## Learn More
+The deployment process:
+1. Builds the Next.js application
+2. Uploads the static files to S3
+3. Invalidates the CloudFront cache
+4. Makes the changes live on the website
 
-To learn more about Next.js, take a look at the following resources:
+## Infrastructure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The infrastructure is managed with Terraform and includes:
+- CloudFront distribution for content delivery
+- S3 bucket for static file hosting
+- Route53 for DNS management
+- ACM for SSL/TLS certificate
+- CloudWatch for monitoring and alerts

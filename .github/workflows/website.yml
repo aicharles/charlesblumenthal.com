@@ -9,32 +9,11 @@ on:
   pull_request:
     paths:
       - 'website/**'
-  workflow_run:
-    workflows: ["release-please"]
-    types:
-      - completed
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          # Dev deploys on main branch pushes
-          - environment: dev
-            bucket: charlesblumenthal-com-website-dev
-            distribution_id: ${{ secrets.DEV_CLOUDFRONT_DISTRIBUTION_ID }}
-            condition: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-          # Prod deploys only on successful release-please merge
-          - environment: prod
-            bucket: charlesblumenthal-com-website
-            distribution_id: ${{ secrets.PROD_CLOUDFRONT_DISTRIBUTION_ID }}
-            condition: >-
-              ${{ github.event_name == 'workflow_run' && 
-                  github.event.workflow_run.conclusion == 'success' && 
-                  github.event.workflow_run.head_branch == 'main' }}
-
-    if: ${{ matrix.condition }}
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
     steps:
       - uses: actions/checkout@v4
@@ -53,8 +32,6 @@ jobs:
       - name: Build
         working-directory: website
         run: npm run build
-        env:
-          NEXT_PUBLIC_ENV: ${{ matrix.environment }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -66,10 +43,10 @@ jobs:
       - name: Deploy to S3
         working-directory: website
         run: |
-          aws s3 sync out/ s3://${{ matrix.bucket }} --delete
+          aws s3 sync out/ s3://charlesblumenthal-com-website --delete
 
       - name: Invalidate CloudFront
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id ${{ matrix.distribution_id }} \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
             --paths "/*"
