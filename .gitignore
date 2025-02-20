@@ -42,6 +42,7 @@ override.tf.json
 .terraformrc.json
 terraform.tfvars
 *.tfvars
+!*.tfvars.example
 
 # IDEs and editors
 .vscode/
