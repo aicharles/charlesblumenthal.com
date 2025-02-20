@@ -137,14 +137,34 @@ resource "aws_iam_role_policy" "terraform_policy" {
       {
         Effect = "Allow"
         Action = [
-          "s3:*"
+          "s3:ListAllMyBuckets",
+          "s3:*",
+          "s3:CreateBucket",
+          "s3:DeleteBucket",
+          "s3:PutBucketPolicy",
+          "s3:GetBucketPolicy",
+          "s3:PutBucketVersioning",
+          "s3:GetBucketVersioning",
+          "s3:PutBucketPublicAccessBlock",
+          "s3:GetBucketPublicAccessBlock",
+          "s3:PutEncryptionConfiguration",
+          "s3:GetEncryptionConfiguration"
         ]
         Resource = [
           "arn:aws:s3:::${var.website_bucket_name}",
           "arn:aws:s3:::${var.website_bucket_name}/*",
+          "arn:aws:s3:::${var.website_bucket_name}-logs",
+          "arn:aws:s3:::${var.website_bucket_name}-logs/*",
           "arn:aws:s3:::aicharles-personal-site-terraform-state",
           "arn:aws:s3:::aicharles-personal-site-terraform-state/*"
         ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:ListAllMyBuckets"
+        ]
+        Resource = "*"
       },
       {
         Effect = "Allow"
@@ -163,6 +183,63 @@ resource "aws_iam_role_policy" "terraform_policy" {
           "dynamodb:DeleteItem"
         ]
         Resource = "arn:aws:dynamodb:us-east-2:*:table/personal-site-terraform-state-lock"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:CreateKey",
+          "kms:CreateAlias",
+          "kms:DeleteAlias",
+          "kms:DescribeKey",
+          "kms:EnableKeyRotation",
+          "kms:GetKeyPolicy",
+          "kms:GetKeyRotationStatus",
+          "kms:ListAliases",
+          "kms:ListKeyPolicies",
+          "kms:ListKeys",
+          "kms:PutKeyPolicy",
+          "kms:ScheduleKeyDeletion",
+          "kms:TagResource",
+          "kms:UntagResource",
+          "kms:UpdateAlias",
+          "kms:UpdateKeyDescription",
+          "kms:ListResourceTags",
+          "kms:GenerateDataKey"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "sns:CreateTopic",
+          "sns:DeleteTopic",
+          "sns:GetTopicAttributes",
+          "sns:ListTopics",
+          "sns:SetTopicAttributes",
+          "sns:Subscribe",
+          "sns:Unsubscribe",
+          "sns:ListSubscriptionsByTopic",
+          "sns:ListTagsForResource",
+          "sns:TagResource",
+          "sns:UntagResource",
+          "sns:GetSubscriptionAttributes"
+        ]
+        Resource = "arn:aws:sns:*:*:*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "cloudwatch:PutMetricAlarm",
+          "cloudwatch:DeleteAlarms",
+          "cloudwatch:DescribeAlarms",
+          "cloudwatch:GetMetricStatistics",
+          "cloudwatch:ListMetrics",
+          "cloudwatch:SetAlarmState",
+          "cloudwatch:ListTagsForResource",
+          "cloudwatch:TagResource",
+          "cloudwatch:UntagResource"
+        ]
+        Resource = "*"
       }
     ]
   })
