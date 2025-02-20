@@ -1,33 +1,60 @@
-name: Terraform Infrastructure
+name: Infrastructure
 
 on:
   push:
-    branches: [ master ]
-
-permissions:
-  id-token: write
-  contents: read
+    branches:
+      - main
+    paths:
+      - 'infrastructure/**'
+  pull_request:
+    paths:
+      - 'infrastructure/**'
+  workflow_run:
+    workflows: ["release-please"]
+    types:
+      - completed
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - environment: dev
+            auto_approve: true
+            condition: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          - environment: prod
+            auto_approve: true
+            condition: >-
+              ${{ github.event_name == 'workflow_run' && 
+                  github.event.workflow_run.conclusion == 'success' && 
+                  github.event.workflow_run.head_branch == 'main' }}
+    
+    if: ${{ matrix.condition }}
     
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: ${{ secrets.TERRAFORM_ROLE_ARN }}
-        aws-region: us-east-2
-    
-    - uses: hashicorp/setup-terraform@v2
-    
-    - name: Terraform Init
-      run: cd infrastructure/website && terraform init
-    
-    - name: Terraform Plan
-      run: cd infrastructure/website && terraform plan
-    
-    - name: Terraform Apply
-      run: cd infrastructure/website && terraform apply -auto-approve
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+
+      - name: Terraform Init
+        working-directory: infrastructure/website
+        run: |
+          terraform init
+          terraform workspace select ${{ matrix.environment }} || terraform workspace new ${{ matrix.environment }}
+
+      - name: Terraform Plan
+        working-directory: infrastructure/website
+        run: terraform plan -var-file=${{ matrix.environment }}.tfvars -out=tfplan
+
+      - name: Terraform Apply
+        working-directory: infrastructure/website
+        run: terraform apply -auto-approve tfplan

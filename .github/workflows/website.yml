@@ -1,48 +1,75 @@
-name: Deploy Website
+name: Website Deployment
 
 on:
   push:
-    branches: [ master ]  
-  workflow_dispatch:    
-
-# Add permissions block
-permissions:
-  id-token: write
-  contents: read
+    branches:
+      - main
+    paths:
+      - 'website/**'
+  pull_request:
+    paths:
+      - 'website/**'
+  workflow_run:
+    workflows: ["release-please"]
+    types:
+      - completed
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: website  
+    strategy:
+      matrix:
+        include:
+          # Dev deploys on main branch pushes
+          - environment: dev
+            bucket: charlesblumenthal-com-website-dev
+            distribution_id: ${{ secrets.DEV_CLOUDFRONT_DISTRIBUTION_ID }}
+            condition: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          # Prod deploys only on successful release-please merge
+          - environment: prod
+            bucket: charlesblumenthal-com-website
+            distribution_id: ${{ secrets.PROD_CLOUDFRONT_DISTRIBUTION_ID }}
+            condition: >-
+              ${{ github.event_name == 'workflow_run' && 
+                  github.event.workflow_run.conclusion == 'success' && 
+                  github.event.workflow_run.head_branch == 'main' }}
+
+    if: ${{ matrix.condition }}
     
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: website/package-lock.json 
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Build
-      run: npm run build
-    
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: ${{ secrets.DEPLOY_ROLE_ARN }}
-        aws-region: us-east-2
-    
-    - name: Deploy to S3
-      run: |
-        aws s3 sync out/ s3://charlesblumenthal-com-website --delete
-    
-    - name: Invalidate CloudFront
-      run: |
-        aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: website/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: website
+        run: npm ci
+
+      - name: Build
+        working-directory: website
+        run: npm run build
+        env:
+          NEXT_PUBLIC_ENV: ${{ matrix.environment }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+
+      - name: Deploy to S3
+        working-directory: website
+        run: |
+          aws s3 sync out/ s3://${{ matrix.bucket }} --delete
+
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ matrix.distribution_id }} \
+            --paths "/*"
