@@ -9,6 +9,10 @@ import Certifications from "@/components/sections/Certifications";
 import Projects from "@/components/sections/Projects";
 import Contact from "@/components/sections/Contact";
 
+/**
+ * Home page component that renders the main sections of the website
+ * with smooth scrolling navigation and section highlighting.
+ */
 export default function Home() {
   const [activeSection, setActiveSection] = useState("about");
 
