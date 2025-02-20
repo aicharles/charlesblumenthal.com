@@ -1,6 +1,6 @@
 export const stats = [
   { label: "Years Experience", value: "10+" },
-  { label: "AWS & Cloud Certs", value: "2" },
+  { label: "AWS & Cloud Certs", value: "3" },
   { label: "Production AI Apps", value: "10+" }
 ];
 
