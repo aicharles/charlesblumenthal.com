@@ -42,6 +42,7 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::779846805358:role/github-deployer-role
           aws-region: us-east-2
+          audience: sts.amazonaws.com
 
       - name: Deploy to S3
         working-directory: website
