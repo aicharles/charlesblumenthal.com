@@ -47,7 +47,10 @@ jobs:
       - name: Deploy to S3
         working-directory: website
         run: |
-          aws s3 sync out/ s3://charlesblumenthal-com-website --delete
+          aws s3 sync out/ s3://charlesblumenthal-com-website --delete --content-type "text/html" --exclude "*" --include "*.html" --include "index.html"
+          aws s3 sync out/ s3://charlesblumenthal-com-website --delete --content-type "text/css" --exclude "*" --include "*.css"
+          aws s3 sync out/ s3://charlesblumenthal-com-website --delete --content-type "application/javascript" --exclude "*" --include "*.js"
+          aws s3 sync out/ s3://charlesblumenthal-com-website --delete --exclude "*.html" --exclude "*.css" --exclude "*.js"
 
       - name: Invalidate CloudFront
         run: |
