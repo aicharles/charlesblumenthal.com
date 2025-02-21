@@ -1,12 +1,3 @@
-variable "environment" {
-  type        = string
-  description = "The environment (dev or prod)"
-  validation {
-    condition     = contains(["dev", "prod"], var.environment)
-    error_message = "Environment must be either 'dev' or 'prod'"
-  }
-}
-
 terraform {
   required_providers {
     aws = {
@@ -20,6 +11,7 @@ terraform {
     key            = "website/terraform.tfstate"
     region         = "us-east-2"
     encrypt        = true
+    lock_timeout   = "10m"
     dynamodb_table = "personal-site-terraform-state-lock"
   }
 }
@@ -35,14 +27,11 @@ variable "website_bucket_name" {
 }
 
 locals {
-  domain_name = var.environment == "prod" ? var.domain_name : "dev.${var.domain_name}"
-  bucket_name = var.environment == "prod" ? var.website_bucket_name : "${var.website_bucket_name}-dev"
-
   common_tags = {
-    Environment = var.environment
-    ManagedBy   = "terraform"
-    Project     = "personal-website"
+    ManagedBy = "terraform"
+    Project   = "personal-website"
   }
+  s3_origin_domain = "${var.website_bucket_name}.s3-website.${data.aws_region.current.name}.amazonaws.com"
 }
 
 provider "aws" {
@@ -56,15 +45,16 @@ provider "aws" {
 
 # Get current AWS account ID
 data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
 
 # 1. First create the Route53 zone
 resource "aws_route53_zone" "main" {
-  name = local.domain_name
+  name = var.domain_name
 }
 
 # 2. Reference the zone
 data "aws_route53_zone" "selected" {
-  name         = local.domain_name
+  name         = var.domain_name
   private_zone = false
 
   depends_on = [aws_route53_zone.main]
@@ -73,7 +63,7 @@ data "aws_route53_zone" "selected" {
 # 3. Create the certificate
 resource "aws_acm_certificate" "website" {
   provider          = aws.acm_region
-  domain_name       = local.domain_name
+  domain_name       = var.domain_name
   validation_method = "DNS"
 
   lifecycle {
@@ -96,7 +86,7 @@ resource "aws_route53_record" "cert_validation" {
   records         = [each.value.record]
   ttl             = 60
   type            = each.value.type
-  zone_id         = aws_route53_zone.main.zone_id # Use the zone we created directly
+  zone_id         = aws_route53_zone.main.zone_id
 
   depends_on = [aws_route53_zone.main]
 }
@@ -110,7 +100,7 @@ resource "aws_acm_certificate_validation" "website" {
 
 # 6. Create S3 bucket and its configuration
 resource "aws_s3_bucket" "website" {
-  bucket        = local.bucket_name
+  bucket        = var.website_bucket_name
   force_destroy = true
 
   tags = local.common_tags
@@ -136,50 +126,23 @@ resource "aws_s3_bucket_public_access_block" "website" {
   restrict_public_buckets = true
 }
 
+# Set bucket ownership controls
+resource "aws_s3_bucket_ownership_controls" "website" {
+  bucket = aws_s3_bucket.website.id
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
+}
+
 # Add server-side encryption configuration
 resource "aws_s3_bucket_server_side_encryption_configuration" "website" {
   bucket = aws_s3_bucket.website.id
 
   rule {
     apply_server_side_encryption_by_default {
-      kms_master_key_id = aws_kms_key.website_bucket.arn
-      sse_algorithm     = "aws:kms"
+      sse_algorithm = "AES256"
     }
   }
-}
-
-# Create KMS key for S3 bucket encryption
-resource "aws_kms_key" "website_bucket" {
-  description             = "KMS key for website bucket encryption"
-  deletion_window_in_days = 7
-  enable_key_rotation     = true
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid    = "Enable IAM User Permissions"
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
-        }
-        Action   = "kms:*"
-        Resource = "*"
-      },
-      {
-        Sid    = "AllowGitHubActionsKMS"
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/github-deployer-role"
-        }
-        Action = [
-          "kms:GenerateDataKey",
-          "kms:Decrypt"
-        ]
-        Resource = "*"
-      }
-    ]
-  })
 }
 
 # Add bucket versioning
@@ -191,9 +154,8 @@ resource "aws_s3_bucket_versioning" "website" {
 }
 
 # Add bucket logging
-#tfsec:ignore:aws-s3-enable-bucket-logging:This is a logs bucket - no need to log access to logs
 resource "aws_s3_bucket" "website_logs" {
-  bucket        = "${local.bucket_name}-logs"
+  bucket        = "${var.website_bucket_name}-logs"
   force_destroy = true
 }
 
@@ -248,8 +210,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "website_logs" {
 
   rule {
     apply_server_side_encryption_by_default {
-      kms_master_key_id = aws_kms_key.website_bucket.arn
-      sse_algorithm     = "aws:kms"
+      sse_algorithm = "AES256"
     }
   }
 }
@@ -317,27 +278,36 @@ resource "aws_cloudfront_origin_access_control" "website" {
 }
 
 # 8. Create CloudFront distribution
-#tfsec:ignore:aws-cloudfront-enable-waf
 resource "aws_cloudfront_distribution" "website" {
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = "index.html"
-  aliases             = [local.domain_name]
+  aliases             = [var.domain_name]
 
   depends_on = [aws_acm_certificate_validation.website]
+
+  # Add retry logic for distribution updates
+  lifecycle {
+    create_before_destroy = true
+  }
 
   origin {
     domain_name              = aws_s3_bucket.website.bucket_regional_domain_name
     origin_access_control_id = aws_cloudfront_origin_access_control.website.id
-    origin_id                = "S3Origin"
+    origin_path              = ""
+    s3_origin_config {
+      origin_access_identity = ""
+    }
+    origin_id = "S3Origin"
   }
 
   default_cache_behavior {
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
+    allowed_methods        = ["GET", "HEAD", "OPTIONS"]
+    cached_methods         = ["GET", "HEAD", "OPTIONS"]
     target_origin_id       = "S3Origin"
     viewer_protocol_policy = "redirect-to-https"
     compress               = true
+    smooth_streaming       = false
 
     forwarded_values {
       query_string = false
@@ -346,9 +316,9 @@ resource "aws_cloudfront_distribution" "website" {
       }
     }
 
-    min_ttl     = 0
-    default_ttl = 3600  # 1 hour
-    max_ttl     = 86400 # 24 hours
+    min_ttl     = 0        # No minimum TTL
+    default_ttl = 86400    # 24 hours
+    max_ttl     = 31536000 # 1 year
   }
 
   custom_error_response {
@@ -380,8 +350,6 @@ resource "aws_cloudfront_distribution" "website" {
     bucket          = aws_s3_bucket.website_logs.bucket_regional_domain_name
     prefix          = "cloudfront-logs/"
   }
-
-  web_acl_id = var.environment == "dev" ? aws_wafv2_web_acl.dev_environment[0].id : null
 }
 
 # 9. Create S3 bucket policy after CloudFront is created
@@ -389,23 +357,31 @@ resource "aws_s3_bucket_policy" "website" {
   bucket = aws_s3_bucket.website.id
 
   policy = jsonencode({
-    Version = "2012-10-17"
+    Version = "2012-10-17",
     Statement = [
       {
-        Sid    = "AllowCloudFrontAccess"
-        Effect = "Allow"
+        Sid    = "AllowCloudFrontAccess",
+        Effect = "Allow",
         Principal = {
           Service = "cloudfront.amazonaws.com"
         }
-        Action   = "s3:GetObject"
-        Resource = "${aws_s3_bucket.website.arn}/*"
+        Action = [
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:GetBucketLocation"
+        ],
+        Resource = [
+          "${aws_s3_bucket.website.arn}/*",
+          aws_s3_bucket.website.arn
+        ],
         Condition = {
           StringEquals = {
-            "AWS:SourceArn" = aws_cloudfront_distribution.website.arn
+            "AWS:SourceArn" : aws_cloudfront_distribution.website.arn,
+            "AWS:SourceAccount" : data.aws_caller_identity.current.account_id
           }
         }
       }
-    ]
+    ],
   })
 
   depends_on = [aws_cloudfront_distribution.website]
@@ -414,7 +390,7 @@ resource "aws_s3_bucket_policy" "website" {
 # 10. Create the website A record
 resource "aws_route53_record" "website" {
   zone_id = data.aws_route53_zone.selected.zone_id
-  name    = local.domain_name
+  name    = var.domain_name
   type    = "A"
 
   alias {
@@ -525,64 +501,3 @@ resource "aws_sns_topic_subscription" "website_alerts_email" {
   protocol  = "email"
   endpoint  = "charlesblumenthal@gmail.com"
 }
-
-# Add WAF IPSet for dev environment
-resource "aws_wafv2_ip_set" "dev_allowed_ips" {
-  provider           = aws.acm_region # WAF needs to be in us-east-1
-  count              = var.environment == "dev" ? 1 : 0
-  name               = "allowed-ips"
-  description        = "IP addresses allowed to access dev environment"
-  ip_address_version = "IPV4"
-  scope              = "CLOUDFRONT"
-
-  addresses = var.allowed_ips # You'll define this in your tfvars files
-}
-
-# Create WAF WebACL for dev environment
-resource "aws_wafv2_web_acl" "dev_environment" {
-  provider    = aws.acm_region
-  count       = var.environment == "dev" ? 1 : 0
-  name        = "dev-environment-restrictions"
-  description = "ACL for dev environment access control"
-  scope       = "CLOUDFRONT"
-
-  default_action {
-    block {}
-  }
-
-  rule {
-    name     = "AllowListedIPs"
-    priority = 1
-
-    override_action {
-      none {}
-    }
-
-    statement {
-      ip_set_reference_statement {
-        arn = aws_wafv2_ip_set.dev_allowed_ips[0].arn
-      }
-    }
-
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name                = "AllowListedIPsMetric"
-      sampled_requests_enabled   = true
-    }
-  }
-
-  visibility_config {
-    cloudwatch_metrics_enabled = true
-    metric_name                = "DevEnvironmentACLMetric"
-    sampled_requests_enabled   = true
-  }
-}
-
-# Add variable for allowed IPs
-variable "allowed_ips" {
-  type        = list(string)
-  description = "List of IP addresses allowed to access dev environment"
-  default     = [] # Empty default for prod
-}
-
-
