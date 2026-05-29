@@ -117,10 +117,7 @@ export default function BentoGrid() {
           className="col-span-1 row-span-2 bg-white rounded-3xl p-5 border border-warm-200/60 group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between"
         >
           <div>
-            <p className="text-[10px] font-semibold text-warm-400 uppercase tracking-widest">
-              Writing
-            </p>
-            <h3 className="mt-2 text-base font-semibold text-warm-900">
+            <h3 className="text-base font-semibold text-warm-900">
               Periwinkle Blog
             </h3>
             <p className="mt-1.5 text-sm text-warm-500 leading-relaxed">
@@ -141,10 +138,7 @@ export default function BentoGrid() {
           className="col-span-1 row-span-2 bg-white rounded-3xl p-5 border border-warm-200/60 group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between"
         >
           <div>
-            <p className="text-[10px] font-semibold text-warm-400 uppercase tracking-widest">
-              Writing
-            </p>
-            <h3 className="mt-2 text-base font-semibold text-warm-900">
+            <h3 className="text-base font-semibold text-warm-900">
               Personal Blog
             </h3>
             <p className="mt-1.5 text-sm text-warm-500 leading-relaxed">
@@ -264,7 +258,7 @@ export default function BentoGrid() {
         {/* Social feeds - live posts with tabs (tall, right column) */}
         <motion.div
           variants={item}
-          className="col-span-2 md:col-span-2 row-span-3 bg-white rounded-3xl p-5 border border-warm-200/60"
+          className="col-span-2 md:col-span-2 row-span-3 self-start bg-white rounded-3xl p-5 border border-warm-200/60"
         >
           <SocialFeeds />
         </motion.div>

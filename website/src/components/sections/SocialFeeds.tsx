@@ -18,7 +18,7 @@ export default function SocialFeeds() {
 
   return (
     <div>
-      <p className="text-[10px] font-semibold text-warm-400 uppercase tracking-widest mb-3">
+      <p className="text-[10px] font-semibold text-warm-600 uppercase tracking-widest mb-3">
         Social Feeds
       </p>
       <div className="flex items-center gap-2 mb-4">
