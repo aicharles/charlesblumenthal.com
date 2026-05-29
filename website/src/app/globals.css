@@ -1,6 +1,92 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@theme {
+  --color-periwinkle-50: #f5f3ff;
+  --color-periwinkle-100: #ede9fe;
+  --color-periwinkle-200: #ddd6fe;
+  --color-periwinkle-300: #c4b5fd;
+  --color-periwinkle-400: #a78bfa;
+  --color-periwinkle-500: #8b5cf6;
+  --color-periwinkle-600: #7c3aed;
+  --color-periwinkle-700: #6d28d9;
+  --color-periwinkle-800: #5b21b6;
+  --color-periwinkle-900: #4c1d95;
+
+  --color-warm-50: #faf9f7;
+  --color-warm-100: #f5f3ef;
+  --color-warm-200: #e8e4dd;
+  --color-warm-300: #d6d0c5;
+  --color-warm-400: #b8b0a2;
+  --color-warm-500: #9a9183;
+  --color-warm-600: #7d7568;
+  --color-warm-700: #645d52;
+  --color-warm-800: #504a41;
+  --color-warm-900: #3b3730;
+
+  --font-display: var(--font-cabinet), system-ui, sans-serif;
+  --font-body: var(--font-satoshi), system-ui, sans-serif;
+
+  --animate-blink: blink 1s step-end infinite;
+  --animate-gradient-shift: gradient-shift 6s ease infinite;
+  --animate-float: float 6s ease-in-out infinite;
+
+  --background-size-200\%: 200% 200%;
+
+  @keyframes blink {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
+    }
+  }
+  @keyframes gradient-shift {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility bg-gradient-animated {
+  background-size: 200% 200%;
+  animation: gradient-shift 6s ease infinite;
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
 
 @layer base {
   ::selection {
@@ -16,16 +102,5 @@
   body {
     color: #504a41;
     background-color: #faf9f7;
-  }
-}
-
-@layer utilities {
-  .bg-gradient-animated {
-    background-size: 200% 200%;
-    animation: gradient-shift 6s ease infinite;
-  }
-
-  .text-balance {
-    text-wrap: balance;
   }
 }

@@ -24,7 +24,7 @@ export default function SocialFeeds() {
       <div className="flex items-center gap-2 mb-4">
         <Icon
           size={16}
-          className={`${isTwitter ? "text-warm-900" : "text-sky-500"} flex-shrink-0`}
+          className={`${isTwitter ? "text-warm-900" : "text-sky-500"} shrink-0`}
         />
         <div className="flex flex-wrap gap-1.5">
           {FEEDS.map((f, i) => {
@@ -54,7 +54,7 @@ export default function SocialFeeds() {
           href={`https://x.com/${current.handle}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex flex-col items-center justify-center gap-3 text-center rounded-xl bg-warm-50 hover:bg-white border border-transparent hover:border-warm-200/60 hover:shadow-sm transition-all duration-200 p-6 min-h-[180px]"
+          className="group flex flex-col items-center justify-center gap-3 text-center rounded-xl bg-warm-50 hover:bg-white border border-transparent hover:border-warm-200/60 hover:shadow-xs transition-all duration-200 p-6 min-h-[180px]"
         >
           <p className="text-sm text-warm-600 leading-relaxed max-w-xs">
             Twitter/X has no public API, unlike the AT Protocol. womp, womp.{" "}

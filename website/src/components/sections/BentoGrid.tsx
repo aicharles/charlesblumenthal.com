@@ -25,7 +25,7 @@ const item = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] },
+    transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] as const },
   },
 };
 
@@ -78,7 +78,7 @@ export default function BentoGrid() {
           href="https://periwinkle.social"
           target="_blank"
           rel="noopener noreferrer"
-          className="col-span-2 row-span-2 bg-gradient-to-br from-periwinkle-500 via-periwinkle-600 to-periwinkle-700 rounded-3xl p-6 sm:p-8 flex flex-col justify-between text-white group hover:shadow-xl hover:scale-[1.01] transition-all duration-300 min-h-[280px]"
+          className="col-span-2 row-span-2 bg-linear-to-br from-periwinkle-500 via-periwinkle-600 to-periwinkle-700 rounded-3xl p-6 sm:p-8 flex flex-col justify-between text-white group hover:shadow-xl hover:scale-[1.01] transition-all duration-300 min-h-[280px]"
         >
           <div>
             <p className="text-xs font-medium text-periwinkle-200 uppercase tracking-widest">
@@ -176,7 +176,7 @@ export default function BentoGrid() {
         {/* What I'm Into - consolidated (left column, above the photos) */}
         <motion.div
           variants={item}
-          className="col-span-2 bg-gradient-to-br from-warm-800 to-warm-900 rounded-3xl p-5 sm:p-6"
+          className="col-span-2 bg-linear-to-br from-warm-800 to-warm-900 rounded-3xl p-5 sm:p-6"
         >
           <p className="text-xs font-semibold text-warm-300 uppercase tracking-wider">
             What I&apos;m Into Right Now
