@@ -10,7 +10,6 @@ const lifePhotos = [
   { src: "/eggs.jpeg", alt: "The Charles Blumenthal Special" },
   { src: "/dogs-bed.jpeg", alt: "Dogs cuddling on the bed" },
   { src: "/shells-greens.jpeg", alt: "Shells, greens, and a blizzard of parm" },
-  { src: "/couch.jpeg", alt: "Couch time with the pup" },
   { src: "/chicken-parm.jpeg", alt: "Chicken parm, Berlin edition" },
   { src: "/bread-pudding.jpeg", alt: "Sunday bread pudding" },
 ];
@@ -276,8 +275,10 @@ export default function BentoGrid() {
               Dogs, dinners, and Berlin
             </h3>
           </div>
-          <div className="px-4 pb-4 pt-1 flex-1 min-h-0">
-            <Carousel images={lifePhotos} heightClass="h-full" />
+          <div className="px-4 pb-4 pt-1">
+            <div className="relative w-full aspect-[4/3]">
+              <Carousel images={lifePhotos} heightClass="h-full" />
+            </div>
           </div>
         </motion.div>
       </motion.div>

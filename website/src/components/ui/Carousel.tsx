@@ -26,7 +26,7 @@ export default function Carousel({
         key={images[index].src}
         src={images[index].src}
         alt={images[index].alt}
-        className={`w-full ${heightClass} object-cover rounded-2xl shadow-xs border-2 border-white`}
+        className={`absolute inset-0 w-full ${heightClass} object-cover rounded-2xl shadow-xs border-2 border-white`}
       />
 
       {count > 1 && (
