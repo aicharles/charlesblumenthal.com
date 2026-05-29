@@ -65,8 +65,8 @@ export default function Hero() {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-          className="mx-auto mb-8 w-28 h-28 rounded-full bg-gradient-to-br from-periwinkle-200 to-periwinkle-100 ring-4 ring-white shadow-lg flex items-center justify-center overflow-hidden"
+          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] as const }}
+          className="mx-auto mb-8 w-28 h-28 rounded-full bg-linear-to-br from-periwinkle-200 to-periwinkle-100 ring-4 ring-white shadow-lg flex items-center justify-center overflow-hidden"
         >
           {/* Replace this div with <img src="/headshot.jpg" alt="Charles Blumenthal" className="w-full h-full object-cover" /> when photo is ready */}
           <span
@@ -128,7 +128,7 @@ export default function Hero() {
         >
           <a
             href="#about"
-            className="rounded-full px-6 py-2.5 text-sm font-medium bg-periwinkle-600 text-white hover:bg-periwinkle-700 transition-colors shadow-sm"
+            className="rounded-full px-6 py-2.5 text-sm font-medium bg-periwinkle-600 text-white hover:bg-periwinkle-700 transition-colors shadow-xs"
           >
             Learn More
           </a>

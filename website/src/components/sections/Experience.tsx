@@ -26,7 +26,7 @@ export default function Experience() {
                     {/* Timeline dot */}
                     <div className="hidden md:flex flex-col items-center pt-2.5">
                       <div
-                        className={`w-[9px] h-[9px] rounded-full flex-shrink-0 ${
+                        className={`w-[9px] h-[9px] rounded-full shrink-0 ${
                           exp.current
                             ? "bg-periwinkle-500 ring-4 ring-periwinkle-100"
                             : "bg-warm-300"
@@ -38,7 +38,7 @@ export default function Experience() {
                     <div
                       className={`flex-1 rounded-2xl border transition-colors ${
                         exp.current
-                          ? "bg-white border-periwinkle-200/60 shadow-sm"
+                          ? "bg-white border-periwinkle-200/60 shadow-xs"
                           : "bg-white border-warm-200/60"
                       } ${isCompact ? "px-5 py-3.5" : "p-5 sm:p-6"}`}
                     >
@@ -73,7 +73,7 @@ export default function Experience() {
                               key={i}
                               className="text-sm text-warm-600 leading-relaxed flex gap-2"
                             >
-                              <span className="text-warm-300 mt-1.5 flex-shrink-0">
+                              <span className="text-warm-300 mt-1.5 shrink-0">
                                 &bull;
                               </span>
                               <span>{item}</span>

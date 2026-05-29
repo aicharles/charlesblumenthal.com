@@ -40,7 +40,7 @@ export default function FadeInView({
       whileInView="visible"
       viewport={{ once, margin: "-60px" }}
       variants={variants[variant]}
-      transition={{ duration, delay, ease: [0.25, 0.1, 0.25, 1] }}
+      transition={{ duration, delay, ease: [0.25, 0.1, 0.25, 1] as const }}
       className={className}
     >
       {children}
@@ -82,7 +82,7 @@ export function StaggerItem({
   return (
     <motion.div
       variants={variants.fadeUp}
-      transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+      transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] as const }}
       className={className}
     >
       {children}

@@ -13,7 +13,7 @@ export default function Projects() {
               className="bg-white p-6 rounded-lg border border-slate-200 flex flex-col"
             >
               <h3 className="text-xl font-semibold text-slate-900">{project.title}</h3>
-              <p className="mt-2 text-slate-600 flex-grow">{project.shortDescription}</p>
+              <p className="mt-2 text-slate-600 grow">{project.shortDescription}</p>
               
               <div className="mt-4 flex flex-wrap gap-2">
                 {project.tags.map((tag, index) => (

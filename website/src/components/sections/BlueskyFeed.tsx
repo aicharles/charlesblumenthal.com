@@ -104,7 +104,7 @@ export default function BlueskyFeed({
             href={postUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="block p-3.5 rounded-xl bg-warm-50 hover:bg-white border border-transparent hover:border-warm-200/60 hover:shadow-sm transition-all duration-200 group"
+            className="block p-3.5 rounded-xl bg-warm-50 hover:bg-white border border-transparent hover:border-warm-200/60 hover:shadow-xs transition-all duration-200 group"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
           >
@@ -113,10 +113,10 @@ export default function BlueskyFeed({
                 <img
                   src={post.author.avatar}
                   alt=""
-                  className="w-8 h-8 rounded-full flex-shrink-0"
+                  className="w-8 h-8 rounded-full shrink-0"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center shrink-0">
                   <FaBluesky size={14} className="text-sky-500" />
                 </div>
               )}
