@@ -1,0 +1,18 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="peri" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8b5cf6" />
+      <stop offset="0.5" stop-color="#7c3aed" />
+      <stop offset="1" stop-color="#6d28d9" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="url(#peri)" />
+  <g fill="#ffffff" fill-opacity="0.95">
+    <circle cx="32" cy="19" r="11" />
+    <circle cx="44.36" cy="27.98" r="11" />
+    <circle cx="39.64" cy="42.52" r="11" />
+    <circle cx="24.36" cy="42.52" r="11" />
+    <circle cx="19.64" cy="27.98" r="11" />
+  </g>
+  <circle cx="32" cy="32" r="7" fill="#ddd6fe" />
+</svg>

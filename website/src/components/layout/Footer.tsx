@@ -1,33 +1,47 @@
-import { FaGithub, FaLinkedin } from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaBluesky } from "react-icons/fa6";
+
+const socialLinks = [
+  {
+    href: "https://bsky.app/profile/charlesblumenthal.com",
+    icon: FaBluesky,
+    label: "Bluesky",
+  },
+  {
+    href: "https://github.com/aicharles",
+    icon: FaGithub,
+    label: "GitHub",
+  },
+  {
+    href: "https://linkedin.com/in/cblumenthal",
+    icon: FaLinkedin,
+    label: "LinkedIn",
+  },
+];
 
 export default function Footer() {
   return (
-    <footer className="bg-white border-t border-slate-200">
-      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <footer className="bg-white border-t border-warm-200/60">
+      <div className="max-w-5xl mx-auto py-6 px-5 sm:px-8">
         <div className="flex justify-between items-center">
-          <p className="text-sm text-slate-600">
-            © {new Date().getFullYear()} Charles Blumenthal. All rights reserved.
+          <p className="text-sm text-warm-400">
+            &copy; {new Date().getFullYear()} Charles Blumenthal
           </p>
-          <div className="flex space-x-4">
-            <a
-              href="https://github.com/yourusername"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-slate-600 hover:text-blue-600 transition-colors p-2 rounded-full hover:bg-slate-100"
-            >
-              <FaGithub size={24} />
-            </a>
-            <a
-              href="https://linkedin.com/in/yourusername"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-slate-600 hover:text-blue-600 transition-colors p-2 rounded-full hover:bg-slate-100"
-            >
-              <FaLinkedin size={24} />
-            </a>
+          <div className="flex items-center gap-1">
+            {socialLinks.map(({ href, icon: Icon, label }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                className="text-warm-400 hover:text-periwinkle-600 transition-colors p-2 rounded-full hover:bg-warm-50"
+              >
+                <Icon size={18} />
+              </a>
+            ))}
           </div>
         </div>
       </div>
     </footer>
   );
-} 
+}

@@ -1,3 +1,31 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  ::selection {
+    background-color: rgb(139 92 246 / 0.2);
+    color: #3b3730;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    color: #504a41;
+    background-color: #faf9f7;
+  }
+}
+
+@layer utilities {
+  .bg-gradient-animated {
+    background-size: 200% 200%;
+    animation: gradient-shift 6s ease infinite;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}

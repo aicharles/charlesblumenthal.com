@@ -18,9 +18,12 @@ export interface Stat {
 export interface Certification {
   title: string;
   year: string;
+  issuer: string;
+  description: string;
+  link: string;
 }
 
 export interface NavProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
-} 
+}

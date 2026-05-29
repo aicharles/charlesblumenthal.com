@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "design": {
+      "command": "bun",
+      "args": ["./tools/design-channel.ts"]
+    }
+  }
+}

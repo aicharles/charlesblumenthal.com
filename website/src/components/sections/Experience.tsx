@@ -1,84 +1,91 @@
+"use client";
+import { experiences } from "@/data/content";
+import FadeInView from "@/components/ui/FadeInView";
+
 export default function Experience() {
   return (
-    <section id="experience" className="py-20 bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-bold text-slate-900">Experience</h2>
+    <section id="experience" className="py-24 bg-warm-50">
+      <div className="max-w-5xl mx-auto px-5 sm:px-8">
+        <FadeInView>
+          <h2 className="text-2xl font-bold text-warm-900 tracking-tight">
+            Experience
+          </h2>
+        </FadeInView>
 
-        <div className="mt-12 space-y-8">
-          <div className="bg-white p-6 rounded-lg border border-slate-200">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <div>
-                <h3 className="text-xl font-semibold text-slate-900">Principal (Jr.) Data Engineer</h3>
-                <p className="text-blue-600">McKinsey & Company</p>
-              </div>
-              <p className="text-sm text-slate-500">July 2021 - Present</p>
-            </div>
-            <ul className="mt-4 space-y-2 text-slate-600">
-              <li>• Architected and deployed production-grade generative AI applications using advanced agentic frameworks</li>
-              <li>• Built intelligent automation systems leveraging LLMs and AI agents, reducing operational workload by 40%</li>
-              <li>• Designed cloud-native AI infrastructure using AWS, Kubernetes, and Terraform for enterprise-scale deployment</li>
-              <li>• Implemented MLOps practices and CI/CD pipelines for reliable AI system deployment</li>
-            </ul>
-          </div>
+        <div className="mt-12 relative">
+          {/* Timeline line */}
+          <div className="absolute left-[11px] top-2 bottom-2 w-px bg-warm-200 hidden md:block" />
 
-          <div className="bg-white p-6 rounded-lg border border-slate-200">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <div>
-                <h3 className="text-xl font-semibold text-slate-900">Senior Data Engineer</h3>
-                <p className="text-blue-600">XSELL Technologies</p>
-              </div>
-              <p className="text-sm text-slate-500">March 2021 - July 2021</p>
-            </div>
-            <ul className="mt-4 space-y-2 text-slate-600">
-              <li>• Developed production ML pipelines for intelligent customer engagement systems</li>
-              <li>• Built real-time AI-powered decision engines using Spark and AWS</li>
-              <li>• Automated complex workflows through AI-assisted development, reducing manual processes by 50%</li>
-            </ul>
-          </div>
+          <div className="space-y-6">
+            {experiences.map((exp, index) => {
+              const isCompact = !exp.current && exp.description.length === 0;
 
-          <div className="bg-white p-6 rounded-lg border border-slate-200">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <div>
-                <h3 className="text-xl font-semibold text-slate-900">Data Engineer</h3>
-                <p className="text-blue-600">Numerator</p>
-              </div>
-              <p className="text-sm text-slate-500">March 2020 - March 2021</p>
-            </div>
-            <ul className="mt-4 space-y-2 text-slate-600">
-              <li>• Engineered intelligent data pipelines for petabyte-scale analytics</li>
-              <li>• Implemented automated optimization systems, reducing cloud costs by 35%</li>
-              <li>• Developed smart ETL processes with built-in data quality checks</li>
-            </ul>
-          </div>
+              return (
+                <FadeInView key={index} delay={index * 0.08}>
+                  <div className="flex gap-6">
+                    {/* Timeline dot */}
+                    <div className="hidden md:flex flex-col items-center pt-2.5">
+                      <div
+                        className={`w-[9px] h-[9px] rounded-full flex-shrink-0 ${
+                          exp.current
+                            ? "bg-periwinkle-500 ring-4 ring-periwinkle-100"
+                            : "bg-warm-300"
+                        }`}
+                      />
+                    </div>
 
-          <div className="bg-white p-6 rounded-lg border border-slate-200">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <div>
-                <h3 className="text-xl font-semibold text-slate-900">Data Engineer</h3>
-                <p className="text-blue-600">GoHealth</p>
-              </div>
-              <p className="text-sm text-slate-500">March 2019 - March 2020</p>
-            </div>
-            <ul className="mt-4 space-y-2 text-slate-600">
-              <li>• Led development of intelligent data processing systems using Databricks and Snowflake</li>
-              <li>• Implemented automated data quality frameworks with predictive monitoring</li>
-              <li>• Built self-optimizing batch processing pipelines</li>
-            </ul>
-          </div>
+                    {/* Card */}
+                    <div
+                      className={`flex-1 rounded-2xl border transition-colors ${
+                        exp.current
+                          ? "bg-white border-periwinkle-200/60 shadow-sm"
+                          : "bg-white border-warm-200/60"
+                      } ${isCompact ? "px-5 py-3.5" : "p-5 sm:p-6"}`}
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                        <div>
+                          <h3
+                            className={`font-semibold text-warm-900 ${
+                              isCompact ? "text-base" : "text-lg"
+                            }`}
+                          >
+                            {exp.title}
+                          </h3>
+                          <p
+                            className={`${
+                              exp.current
+                                ? "text-periwinkle-600"
+                                : "text-warm-500"
+                            } ${isCompact ? "text-sm" : "text-sm"}`}
+                          >
+                            {exp.company}
+                          </p>
+                        </div>
+                        <p className="text-xs text-warm-400 whitespace-nowrap">
+                          {exp.period}
+                        </p>
+                      </div>
 
-          <div className="bg-white p-6 rounded-lg border border-slate-200">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <div>
-                <h3 className="text-xl font-semibold text-slate-900">Data Engineering Contractor</h3>
-                <p className="text-blue-600">Capital One (via Hays)</p>
-              </div>
-              <p className="text-sm text-slate-500">June 2018 - March 2019</p>
-            </div>
-            <ul className="mt-4 space-y-2 text-slate-600">
-              <li>• Developed intelligent risk modeling systems using cloud-based ML pipelines</li>
-              <li>• Enhanced automated decision-making systems through advanced analytics</li>
-              <li>• Implemented smart data processing workflows with automated validation</li>
-            </ul>
+                      {exp.description.length > 0 && (
+                        <ul className="mt-3 space-y-1.5">
+                          {exp.description.map((item, i) => (
+                            <li
+                              key={i}
+                              className="text-sm text-warm-600 leading-relaxed flex gap-2"
+                            >
+                              <span className="text-warm-300 mt-1.5 flex-shrink-0">
+                                &bull;
+                              </span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                </FadeInView>
+              );
+            })}
           </div>
         </div>
       </div>

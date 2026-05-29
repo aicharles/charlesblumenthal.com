@@ -1,63 +1,148 @@
 export const stats = [
-  { label: "Years Experience", value: "10+" },
-  { label: "AWS & Cloud Certs", value: "3" },
-  { label: "Production AI Apps", value: "10+" }
+  { label: "Years in Tech", value: "8+" },
+  { label: "Based in", value: "Berlin" },
+];
+
+export const experiences = [
+  {
+    title: "Founder",
+    company: "Periwinkle",
+    period: "August 2025 - Present",
+    current: true,
+    description: [
+      "Periwinkle hosts and manages your social identity on the AT Protocol, the technology powering apps like Bluesky. It's free to start and there will be no ads, ever.",
+    ],
+  },
+  {
+    title: "Principal (Jr.) Data Engineer",
+    company: "McKinsey & Company",
+    period: "January 2023 - July 2025",
+    current: false,
+    description: [
+      "Architected and deployed production-grade generative AI applications using advanced agentic frameworks",
+      "Built intelligent automation systems leveraging LLMs and AI agents, reducing operational workload by 40%",
+      "Designed cloud-native AI infrastructure using AWS, Kubernetes, and Terraform for enterprise-scale deployment",
+    ],
+  },
+  {
+    title: "Lead Data Engineer",
+    company: "McKinsey & Company",
+    period: "July 2021 - December 2022",
+    current: false,
+    description: [],
+  },
+  {
+    title: "Senior Data Engineer",
+    company: "XSELL Technologies",
+    period: "March 2021 - July 2021",
+    current: false,
+    description: [],
+  },
+  {
+    title: "Data Engineer",
+    company: "Numerator",
+    period: "March 2020 - March 2021",
+    current: false,
+    description: [],
+  },
+  {
+    title: "Data Engineer",
+    company: "GoHealth",
+    period: "March 2019 - March 2020",
+    current: false,
+    description: [],
+  },
+  {
+    title: "Data Analytics & Engineering Contractor",
+    company: "Hays (placed at Capital One)",
+    period: "June 2018 - March 2019",
+    current: false,
+    description: [],
+  },
+  {
+    title: "Marketing & Analytics Manager",
+    company: "Land of Lincoln Health",
+    period: "June 2013 - June 2015",
+    current: false,
+    description: [],
+  },
+  {
+    title: "Consultant",
+    company: "Enlarged Strategies",
+    period: "February 2013 - May 2013",
+    current: false,
+    description: [],
+  },
+  {
+    title: "Account Manager",
+    company: "MassMedia Corporate Communications",
+    period: "February 2012 - February 2013",
+    current: false,
+    description: [],
+  },
+  {
+    title: "Communications Manager",
+    company: "Nevada State Assembly & State Democratic Party",
+    period: "December 2010 - December 2011",
+    current: false,
+    description: [],
+  },
+  {
+    title: "Media Specialist",
+    company: "Friends of Harry Reid 2010",
+    period: "April 2010 - November 2010",
+    current: false,
+    description: [],
+  },
+  {
+    title: "Public Opinion Analyst",
+    company: "Lake Research Partners",
+    period: "February 2008 - April 2010",
+    current: false,
+    description: [],
+  },
+  {
+    title: "Various Positions",
+    company: "Political Campaigns",
+    period: "July 2005 - February 2008",
+    current: false,
+    description: [],
+  },
+];
+
+export const education = [
+  {
+    degree: "Master of Science, Analytics",
+    field: "Mathematics and Statistics",
+    school: "The University of Chicago",
+    period: "2015 - 2017",
+  },
+  {
+    degree: "BA, Political Theory",
+    field: "",
+    school: "City University of New York - Hunter College",
+    period: "2004 - 2007",
+  },
+];
+
+export const certifications = [
+  {
+    title: "AI Agents Fundamentals",
+    year: "2025",
+    issuer: "",
+    description: "",
+    link: "",
+  },
 ];
 
 export const projects = [
   {
     id: 1,
     title: "Enterprise AI Agent Platform",
-    shortDescription: "Developed a production-grade platform leveraging LLMs and AI agents to automate complex enterprise workflows.",
-    fullDescription: "Architected and deployed a sophisticated AI agent platform that combines multiple LLMs, custom AI agents, and automated workflows. The system achieved 40% reduction in operational workload by intelligently handling complex business processes, document analysis, and decision-making tasks. Built with robust MLOps practices ensuring reliable production deployment.",
+    shortDescription:
+      "Developed a production-grade platform leveraging LLMs and AI agents to automate complex enterprise workflows.",
+    fullDescription: "",
     tags: ["AI Agents", "LLMs", "MLOps", "Production Systems"],
-    links: {
-      github: "",
-      demo: ""
-    }
+    links: { github: "", demo: "" },
   },
-  {
-    id: 2,
-    title: "Intelligent Cloud Infrastructure",
-    shortDescription: "Built production-ready, self-optimizing cloud infrastructure for AI applications using advanced automation.",
-    fullDescription: "Designed and implemented an intelligent cloud infrastructure system that automatically scales and optimizes AI workloads. The platform uses AI-driven decision making for resource allocation, cost optimization, and performance tuning. Built on AWS with Kubernetes and Terraform, incorporating advanced monitoring and self-healing capabilities.",
-    tags: ["AWS", "Kubernetes", "AI Automation", "Infrastructure"],
-    links: {
-      github: "",
-      demo: ""
-    }
-  },
-  {
-    id: 3,
-    title: "AI-Accelerated Development Platform",
-    shortDescription: "Created a multi-tenant platform that leverages AI to accelerate enterprise software development.",
-    fullDescription: "Developed an innovative platform that uses AI agents and LLMs to accelerate software development workflows. The system assists developers with code generation, testing, and deployment while maintaining enterprise-grade security and compliance. Successfully deployed to Fortune 500 clients, demonstrating significant development time reduction.",
-    tags: ["AI-Driven Development", "Enterprise", "LLMs", "DevOps"],
-    links: {
-      github: "",
-      demo: ""
-    }
-  }
 ];
-
-export const certifications = [
-  {
-    title: "AWS Certified Solutions Architect",
-    year: "2024",
-    issuer: "Amazon Web Services",
-    description: "Professional level certification demonstrating expertise in designing distributed systems and deploying AI applications on AWS",
-    link: ""
-  },
-  {
-    title: "Terraform Cloud Engineer",
-    year: "2024",
-    issuer: "HashiCorp",
-    description: "Associate level certification in infrastructure as code and cloud automation using Terraform",
-    link: ""
-  }
-];
-
-export const emailConfig = {
-  user: "charlesblumenthal",
-  domain: "gmail.com"
-};
